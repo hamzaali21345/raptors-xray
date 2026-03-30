@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR-Surgeon — X-Ray Your Pull Requests</title>
+  <meta name="description" content="PR Complexity Scorer & Smart Splitter. X-ray your Pull Requests, expose Monster PRs, and get intelligent split suggestions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #030712;
+      --bg-secondary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-pink: #ec4899;
+      --border: #1e293b;
+      --glow-cyan: 0 0 60px rgba(6,182,212,0.15);
+      --glow-purple: 0 0 60px rgba(168,85,247,0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(6,182,212,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6,182,212,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 800px 600px at 20% 30%, rgba(6,182,212,0.08), transparent),
+        radial-gradient(ellipse 600px 400px at 80% 70%, rgba(168,85,247,0.06), transparent),
+        radial-gradient(ellipse 500px 500px at 50% 50%, rgba(239,68,68,0.03), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(3,7,18,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(30,41,59,0.5);
+      padding: 0.8rem 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 1.3rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent-cyan); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)) !important;
+      -webkit-background-clip: unset !important;
+      -webkit-text-fill-color: unset !important;
+      color: white !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: opacity 0.2s;
+    }
+
+    .nav-cta:hover { opacity: 0.9; }
+
+    /* ===== SECTIONS ===== */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding-top: 5rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.3);
+      border-radius: 999px;
+      padding: 0.4rem 1.2rem;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+      margin-bottom: 2rem;
+      animation: fadeInDown 0.6s ease;
+    }
+
+    .hero-badge .pulse {
+      width: 8px; height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 50%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 650px;
+      margin-bottom: 2.5rem;
+      animation: fadeInUp 1s ease;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 1.2s ease;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: white;
+      box-shadow: 0 4px 20px rgba(6,182,212,0.3);
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(6,182,212,0.4); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover { background: var(--bg-card); border-color: var(--accent-cyan); }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 4rem;
+      animation: fadeInUp 1.4s ease;
+    }
+
+    .hero-stat .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+
+    .hero-stat .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== TERMINAL PREVIEW ===== */
+    .terminal-section { padding: 6rem 2rem; }
+
+    .terminal-window {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #0d1117;
+      border-radius: 12px;
+      border: 1px solid #21262d;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5), var(--glow-cyan);
+    }
+
+    .terminal-bar {
+      background: #161b22;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .terminal-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green { background: #28c840; }
+
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: #c9d1d9;
+      overflow-x: auto;
+    }
+
+    .terminal-body .cmd { color: var(--accent-green); }
+    .terminal-body .alert { color: var(--accent-red); font-weight: 700; }
+    .terminal-body .info { color: var(--accent-cyan); }
+    .terminal-body .warn { color: var(--accent-yellow); }
+    .terminal-body .dim { color: #484f58; }
+    .terminal-body .purple { color: var(--accent-purple); }
+
+    /* ===== PROBLEM SECTION ===== */
+    .problem-section { padding: 8rem 2rem; }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      line-height: 1.15;
+    }
+
+    .section-desc {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin-bottom: 3rem;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .problem-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .problem-card:hover { transform: translateY(-4px); border-color: rgba(239,68,68,0.3); }
+    .problem-card:hover::before { opacity: 1; }
+
+    .problem-card .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+
+    .problem-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-card p { color: var(--text-secondary); font-size: 0.95rem; }
+
+    .problem-card .stat-highlight {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.3rem 0.8rem;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-red);
+    }
+
+    /* ===== FEATURES ===== */
+    .features-section { padding: 8rem 2rem; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:nth-child(1)::before { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+    .feature-card:nth-child(2)::before { background: linear-gradient(90deg, #a855f7, #ec4899); }
+    .feature-card:nth-child(3)::before { background: linear-gradient(90deg, #10b981, #06b6d4); }
+    .feature-card:nth-child(4)::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .feature-card:nth-child(5)::before { background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+    .feature-card:nth-child(6)::before { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(6,182,212,0.3); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-card .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p { color: var(--text-secondary); font-size: 0.95rem; }
+
+    .feature-card .feature-tag {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.25rem 0.7rem;
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .how-section { padding: 8rem 2rem; }
+
+    .steps {
+      display: grid;
+      gap: 0;
+      position: relative;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 2rem;
+      padding: 2rem 0;
+      position: relative;
+    }
+
+    .step-number {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 1.3rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .step:nth-child(1) .step-number { background: rgba(6,182,212,0.15); color: var(--accent-cyan); border: 2px solid rgba(6,182,212,0.3); }
+    .step:nth-child(2) .step-number { background: rgba(168,85,247,0.15); color: var(--accent-purple); border: 2px solid rgba(168,85,247,0.3); }
+    .step:nth-child(3) .step-number { background: rgba(245,158,11,0.15); color: var(--accent-yellow); border: 2px solid rgba(245,158,11,0.3); }
+    .step:nth-child(4) .step-number { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 2px solid rgba(16,185,129,0.3); }
+
+    .step-content h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-content p { color: var(--text-secondary); font-size: 1rem; }
+
+    /* ===== SCORING ===== */
+    .scoring-section { padding: 8rem 2rem; }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+
+    .score-table th, .score-table td {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .score-table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-table td { font-size: 0.95rem; }
+
+    .score-table tr:hover { background: rgba(30,41,59,0.5); }
+
+    .severity-pill {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sev-clean { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+    .sev-moderate { background: rgba(245,158,11,0.15); color: var(--accent-yellow); }
+    .sev-complex { background: rgba(249,115,22,0.15); color: #f97316; }
+    .sev-monster { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+    .sev-catastrophic { background: rgba(239,68,68,0.25); color: #ff0040; }
+
+    /* ===== INSTALL ===== */
+    .install-section { padding: 8rem 2rem; }
+
+    .install-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .install-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+
+    .install-card h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      color: var(--accent-cyan);
+      margin-bottom: 1rem;
+    }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #c9d1d9;
+      overflow-x: auto;
+      margin-bottom: 0.75rem;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .code-block .prompt { color: var(--accent-green); }
+    .code-block .comment { color: #484f58; }
+
+    /* ===== ARCHITECTURE ===== */
+    .arch-section { padding: 8rem 2rem; }
+
+    .tech-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    .tech-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .tech-pill:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+    /* ===== HACKATHON BANNER ===== */
+    .hackathon-section {
+      padding: 8rem 2rem;
+      text-align: center;
+    }
+
+    .hackathon-card {
+      background: linear-gradient(135deg, rgba(6,182,212,0.05), rgba(168,85,247,0.05));
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 24px;
+      padding: 4rem 3rem;
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hackathon-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+    }
+
+    .hackathon-card h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .hackathon-card p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .bonus-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+      text-align: left;
+    }
+
+    .bonus-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(16,185,129,0.05);
+      border: 1px solid rgba(16,185,129,0.15);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .bonus-item .check { color: var(--accent-green); font-weight: 700; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .nav-links a:not(.nav-cta) { display: none; }
+      .hero-stats { flex-direction: column; gap: 1.5rem; }
+      .step { grid-template-columns: 50px 1fr; gap: 1rem; }
+      .bonus-grid { grid-template-columns: 1fr; }
+      .hackathon-card { padding: 2rem 1.5rem; }
+      section { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">PR-Surgeon</a>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="nav-cta">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      DX-Ray Hackathon 2026 &middot; Track G: Code Review Radar
+    </div>
+    <h1>
+      <span class="gradient-text">X-Ray</span> Your<br>Pull Requests
+    </h1>
+    <p class="hero-sub">
+      PR-Surgeon scans your code changes, computes a multi-dimensional complexity score, and suggests intelligent ways to split Monster PRs into clean, reviewable pieces.
+    </p>
+    <div class="hero-buttons">
+      <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="btn btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        View on GitHub
+      </a>
+      <a href="#install" class="btn btn-outline">Quick Start</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-val">5</div>
+        <div class="stat-label">Complexity Dimensions</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-val">8</div>
+        <div class="stat-label">Domain Categories</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-val">6</div>
+        <div class="stat-label">CLI Commands</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-val">0</div>
+        <div class="stat-label">Config Needed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TERMINAL PREVIEW -->
+  <section class="terminal-section reveal">
+    <div class="terminal-window">
+      <div class="terminal-bar">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">pr-surgeon scan</span>
+      </div>
+      <div class="terminal-body">
+        <span class="cmd">$</span> pr-surgeon scan<br><br>
+        <span class="info">&#10004;</span> <span class="info">PR X-Ray scan complete!</span><br><br>
+        <span class="alert">&#128680;  MONSTER PR DETECTED!  &#128680;</span><br><br>
+        <span>Complexity Score: </span><span class="alert">245/300</span><br>
+        <span>Severity: </span><span class="alert">MONSTER PR</span><br>
+        <span>Est. Review Time: </span><span class="warn">96 minutes</span><br><br>
+        <span class="dim">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span><br>
+        <span class="info">&#9986;  SMART SPLIT SUGGESTIONS</span><br><br>
+        <span class="warn">PR #1:</span> Database &amp; Schema Changes <span class="dim">(3 files, 198 changes, ~12 min)</span><br>
+        <span class="warn">PR #2:</span> Authentication &amp; Security <span class="dim">(2 files, 143 changes, ~8 min)</span><br>
+        <span class="warn">PR #3:</span> Configuration Changes <span class="dim">(3 files, 48 changes, ~2 min)</span><br>
+        <span class="warn">PR #4:</span> API &amp; Backend Logic <span class="dim">(3 files, 271 changes, ~18 min)</span><br>
+        <span class="warn">PR #5:</span> UI Components &amp; Frontend <span class="dim">(4 files, 311 changes, ~21 min)</span><br>
+        <span class="warn">PR #6:</span> Test Suite Updates <span class="dim">(3 files, 170 changes, ~10 min)</span><br><br>
+        <span class="purple">Complexity Reduction: 62%  &middot;  Review Time Reduction: 88%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="problem-section reveal" id="problem">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">Monster PRs Are Killing<br>Your Code Reviews</h2>
+    <p class="section-desc">Every engineering team has invisible friction that nobody talks about. Large, unfocused Pull Requests are the #1 cause of slow reviews, rubber-stamp approvals, and shipped bugs.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="card-icon">&#128337;</div>
+        <h3>Review Lag</h3>
+        <p>Average time-to-first-review exceeds 24 hours. Large PRs sit untouched because reviewers don't know where to start.</p>
+        <div class="stat-highlight">24h+ avg first review</div>
+      </div>
+      <div class="problem-card">
+        <div class="card-icon">&#128200;</div>
+        <h3>Quality Drops</h3>
+        <p>Research shows review effectiveness drops dramatically after 200 lines. At 1000+ lines, reviewers just skim and approve.</p>
+        <div class="stat-highlight">200 LOC optimal limit</div>
+      </div>
+      <div class="problem-card">
+        <div class="card-icon">&#128027;</div>
+        <h3>More Bugs Ship</h3>
+        <p>Large PRs have 40% higher defect rates. When you mix database changes with UI updates, things get missed.</p>
+        <div class="stat-highlight">40% higher defect rate</div>
+      </div>
+      <div class="problem-card">
+        <div class="card-icon">&#128566;</div>
+        <h3>Reviewer Fatigue</h3>
+        <p>Nobody wants to review a 1500-line PR on a Friday afternoon. The result? Rubber-stamp approvals and technical debt.</p>
+        <div class="stat-highlight">Rubber-stamp risk</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section reveal" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Not Just a Line Counter.<br>A Full Diagnostic Scanner.</h2>
+    <p class="section-desc">PR-Surgeon goes far beyond counting lines of code. It performs multi-dimensional analysis to give you actionable intelligence about your Pull Requests.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="card-icon">&#129504;</div>
+        <h3>5-Dimensional Complexity Score</h3>
+        <p>Analyzes Size, Cognitive Complexity, Domain Spread, File Coupling, and Risk Zones. Each dimension scored 0-300 with weighted averaging.</p>
+        <span class="feature-tag">CORE ENGINE</span>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">&#127758;</div>
+        <h3>Auto Domain Detection</h3>
+        <p>Automatically classifies files into 8 domains: Database, Auth, API, UI, Tests, Config, Infrastructure, and Utils. Zero configuration needed.</p>
+        <span class="feature-tag">AI CLASSIFICATION</span>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">&#9986;&#65039;</div>
+        <h3>Smart Split Suggestions</h3>
+        <p>Dependency-aware splitting that groups coupled files together while separating distinct domains. Suggests optimal merge order.</p>
+        <span class="feature-tag">KILLER FEATURE</span>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">&#9202;&#65039;</div>
+        <h3>Review Time Prediction</h3>
+        <p>Research-backed estimation of how long a review will take. Based on Microsoft &amp; Google studies on code review efficiency.</p>
+        <span class="feature-tag">RESEARCH-BACKED</span>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">&#128202;</div>
+        <h3>Before/After Impact Metrics</h3>
+        <p>Every split suggestion comes with quantifiable improvement metrics: complexity reduction, review time savings, and risk level changes.</p>
+        <span class="feature-tag">MEASURABLE</span>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">&#128300;</div>
+        <h3>X-Ray HTML Report</h3>
+        <p>Beautiful, dark-themed diagnostic report that opens in your browser. Animated bars, domain maps, risk zones, and file rankings.</p>
+        <span class="feature-tag">VISUAL IMPACT</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section reveal" id="how-it-works">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Four Steps to Clean PRs</h2>
+    <p class="section-desc">PR-Surgeon integrates seamlessly into your git workflow. Just one command before you push.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">01</div>
+        <div class="step-content">
+          <h3>Scan Your Diff</h3>
+          <p>Run <code>pr-surgeon scan</code> and it automatically reads your git diff against the target branch. Detects all changed files, insertions, deletions, and content.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <div class="step-content">
+          <h3>Analyze Complexity</h3>
+          <p>Each file is analyzed for cognitive complexity (nesting, control flow, callbacks), domain classification (DB/API/UI/Auth), import dependencies, and risk level.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <div class="step-content">
+          <h3>Generate Split Plan</h3>
+          <p>The smart splitter groups files by domain, respects import coupling within domains, assigns merge order (DB first, UI last), and calculates per-PR metrics.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">04</div>
+        <div class="step-content">
+          <h3>Review & Act</h3>
+          <p>Get a beautiful terminal report or a full HTML X-Ray diagnostic. See before/after metrics and follow the split suggestions to ship clean, focused PRs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCORING -->
+  <section class="scoring-section reveal" id="scoring">
+    <div class="section-label">Scoring System</div>
+    <h2 class="section-title">Multi-Dimensional Complexity Score</h2>
+    <p class="section-desc">Five independent metrics, each scored 0-300, combined with research-backed weights to give a single actionable score.</p>
+
+    <div style="overflow-x:auto;">
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Weight</th>
+          <th>What It Measures</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>&#128207; Size</td>
+          <td><strong>25%</strong></td>
+          <td>Lines changed, files touched, average changes per file</td>
+        </tr>
+        <tr>
+          <td>&#129504; Cognitive</td>
+          <td><strong>25%</strong></td>
+          <td>Nesting depth, control flow, callbacks, promise chains</td>
+        </tr>
+        <tr>
+          <td>&#127758; Domain Spread</td>
+          <td><strong>20%</strong></td>
+          <td>How many layers (DB/API/UI/Auth/Config) are touched</td>
+        </tr>
+        <tr>
+          <td>&#128279; Coupling</td>
+          <td><strong>15%</strong></td>
+          <td>Import dependencies between changed files</td>
+        </tr>
+        <tr>
+          <td>&#9888;&#65039; Risk</td>
+          <td><strong>15%</strong></td>
+          <td>Critical paths: auth, security, DB migrations</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 style="margin-top:3rem; margin-bottom:1rem; font-size:1.2rem;">Severity Levels</h3>
+    <div style="overflow-x:auto;">
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Severity</th>
+          <th>What It Means</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0 &ndash; 50</td>
+          <td><span class="severity-pill sev-clean">&#10004; CLEAN</span></td>
+          <td>Ship it. Reviewers will love you.</td>
+        </tr>
+        <tr>
+          <td>51 &ndash; 100</td>
+          <td><span class="severity-pill sev-moderate">&#9888; MODERATE</span></td>
+          <td>Manageable. Keep an eye on it.</td>
+        </tr>
+        <tr>
+          <td>101 &ndash; 150</td>
+          <td><span class="severity-pill sev-complex">&#128310; COMPLEX</span></td>
+          <td>Consider splitting. Review quality at risk.</td>
+        </tr>
+        <tr>
+          <td>151 &ndash; 250</td>
+          <td><span class="severity-pill sev-monster">&#128680; MONSTER PR</span></td>
+          <td>Split immediately. Reviewers will hate this.</td>
+        </tr>
+        <tr>
+          <td>251 &ndash; 300</td>
+          <td><span class="severity-pill sev-catastrophic">&#128128; CATASTROPHIC</span></td>
+          <td>Emergency intervention needed.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section class="install-section reveal" id="install">
+    <div class="section-label">Get Started</div>
+    <h2 class="section-title">Up and Running in 30 Seconds</h2>
+    <p class="section-desc">No configuration. No API keys. Just clone, install, and scan.</p>
+    <div class="install-grid">
+      <div class="install-card">
+        <h3>&#9889; Quick Install</h3>
+        <div class="code-block">
+          <span class="comment"># Clone the repo</span><br>
+          <span class="prompt">$</span> git clone https://github.com/hamza0281/pr-surgeon.git<br>
+          <span class="prompt">$</span> cd pr-surgeon<br>
+          <span class="prompt">$</span> npm install<br><br>
+          <span class="comment"># Run a demo (no git repo needed)</span><br>
+          <span class="prompt">$</span> npm run demo
+        </div>
+      </div>
+      <div class="install-card">
+        <h3>&#128269; Scan Your Code</h3>
+        <div class="code-block">
+          <span class="comment"># Scan against main branch</span><br>
+          <span class="prompt">$</span> node src/cli.js scan<br><br>
+          <span class="comment"># Scan against a specific branch</span><br>
+          <span class="prompt">$</span> node src/cli.js scan -b develop<br><br>
+          <span class="comment"># Generate HTML X-Ray report</span><br>
+          <span class="prompt">$</span> node src/cli.js scan --report
+        </div>
+      </div>
+      <div class="install-card">
+        <h3>&#128200; More Commands</h3>
+        <div class="code-block">
+          <span class="comment"># Analyze git history patterns</span><br>
+          <span class="prompt">$</span> node src/cli.js history<br><br>
+          <span class="comment"># Install pre-push hook</span><br>
+          <span class="prompt">$</span> node src/cli.js hook install<br><br>
+          <span class="comment"># Full HTML report only</span><br>
+          <span class="prompt">$</span> node src/cli.js report
+        </div>
+      </div>
+      <div class="install-card">
+        <h3>&#128736; Programmatic API</h3>
+        <div class="code-block">
+          <span class="comment">// Use in your own tools</span><br>
+          import { scanCurrentDiff,<br>
+          &nbsp;&nbsp;analyzeComplexity,<br>
+          &nbsp;&nbsp;suggestSplits<br>
+          } from 'pr-surgeon';<br><br>
+          const diff = await scanCurrentDiff('main');<br>
+          const report = analyzeComplexity(diff);<br>
+          const splits = suggestSplits(report);
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section class="arch-section reveal" id="architecture">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">Built for Speed and Reliability</h2>
+    <p class="section-desc">Minimal dependencies. Zero config. Works with any git repository, any language, any framework.</p>
+    <div class="tech-pills">
+      <span class="tech-pill">&#9881; Node.js</span>
+      <span class="tech-pill">&#128187; Commander.js</span>
+      <span class="tech-pill">&#128268; simple-git</span>
+      <span class="tech-pill">&#127912; Chalk</span>
+      <span class="tech-pill">&#128230; Boxen</span>
+      <span class="tech-pill">&#128202; cli-table3</span>
+      <span class="tech-pill">&#127856; Ora</span>
+      <span class="tech-pill">&#128196; HTML Report Gen</span>
+    </div>
+
+    <div class="code-block" style="margin-top:2rem; max-width:500px;">
+      pr-surgeon/<br>
+      &#9500;&#9472;&#9472; src/<br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; cli.js <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# CLI entry</span><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; core/<br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; scanner.js <span class="comment">&nbsp;&nbsp;# Git diff parser</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; complexity.js <span class="comment"># Complexity engine</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; splitter.js <span class="comment">&nbsp;# Smart splitter</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; history.js <span class="comment">&nbsp;&nbsp;# History analyzer</span><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; report/<br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; terminalReport.js<br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; htmlReport.js<br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; hooks/ <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Git hooks</span><br>
+      &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; demo/ <span class="comment">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Demo data</span><br>
+      &#9500;&#9472;&#9472; package.json<br>
+      &#9492;&#9472;&#9472; README.md
+    </div>
+  </section>
+
+  <!-- HACKATHON -->
+  <section class="hackathon-section reveal" id="hackathon">
+    <div class="hackathon-card">
+      <div class="section-label">DX-Ray Hackathon 2026</div>
+      <h2>Track G: Code Review Radar</h2>
+      <p>PR-Surgeon was built in 72 hours for the DX-Ray Hackathon &mdash; an international hackathon focused on exposing hidden friction in developer workflows.</p>
+      <a href="https://dxrayhack.com" target="_blank" class="btn btn-primary" style="margin-bottom:2rem;">Visit DX-Ray Hackathon</a>
+      <div class="bonus-grid">
+        <div class="bonus-item">
+          <span class="check">&#10004;</span>
+          <span><strong>Real Data Demo</strong> &mdash; Works on any git repo</span>
+        </div>
+        <div class="bonus-item">
+          <span class="check">&#10004;</span>
+          <span><strong>Before &amp; After</strong> &mdash; Measurable improvement metrics</span>
+        </div>
+        <div class="bonus-item">
+          <span class="check">&#10004;</span>
+          <span><strong>Open Source Ready</strong> &mdash; MIT license, npm-publishable</span>
+        </div>
+        <div class="bonus-item">
+          <span class="check">&#10004;</span>
+          <span><strong>Cross-Track</strong> &mdash; Connects Code Review + CI insights</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Built with &#10084;&#65039; and too much caffeine during <a href="https://dxrayhack.com" target="_blank">DX-Ray Hackathon 2026</a></p>
+    <p style="margin-top:0.5rem;"><a href="https://github.com/hamza0281/pr-surgeon" target="_blank">GitHub</a> &middot; MIT License &middot; PR-Surgeon v1.0.0</p>
+  </footer>
+
+  <!-- SCROLL REVEAL -->
+  <script>
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    reveals.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
