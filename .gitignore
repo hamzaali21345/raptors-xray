@@ -1,0 +1,5 @@
+node_modules/
+.pr-surgeon/
+*.log
+.env
+.DS_Store
