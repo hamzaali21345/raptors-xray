@@ -1,4 +1,4 @@
-# 🔬 PR-Surgeon
+# 🔬 Incisio
 
 **PR Complexity Scorer & Smart Splitter — X-ray your Pull Requests**
 
@@ -19,11 +19,11 @@ Every engineering team has experienced it: a Pull Request with **+1,000 lines**,
 
 ## The Solution
 
-**PR-Surgeon** is a CLI tool that acts as an **X-ray scanner for your Pull Requests**. It doesn't just count lines — it performs a **multi-dimensional complexity analysis** and provides **intelligent split suggestions** based on domain clustering and dependency analysis.
+**Incisio** is a CLI tool that acts as an **X-ray scanner for your Pull Requests**. It doesn't just count lines — it performs a **multi-dimensional complexity analysis** and provides **intelligent split suggestions** based on domain clustering and dependency analysis.
 
-### What Makes PR-Surgeon Different?
+### What Makes Incisio Different?
 
-| Feature | Basic LOC Counter | PR-Surgeon |
+| Feature | Basic LOC Counter | Incisio |
 |---------|:-----------------:|:----------:|
 | Line count | ✅ | ✅ |
 | Cognitive complexity analysis | ❌ | ✅ |
@@ -43,8 +43,8 @@ Every engineering team has experienced it: a Pull Request with **+1,000 lines**,
 
 ```bash
 # Clone and install
-git clone https://github.com/YOUR_USERNAME/pr-surgeon.git
-cd pr-surgeon
+git clone https://github.com/hamzaali21345/raptors-xray.git
+cd raptors-xray
 npm install
 
 # Run a demo (no git repo needed)
@@ -59,7 +59,7 @@ npm run report
 
 ## 📋 Commands
 
-### `pr-surgeon scan`
+### `incisio scan`
 Scan current git diff for PR complexity.
 
 ```bash
@@ -70,7 +70,7 @@ node src/cli.js scan -t 100             # Set custom threshold
 node src/cli.js scan --json             # Output as JSON
 ```
 
-### `pr-surgeon report`
+### `incisio report`
 Generate a full HTML X-Ray report and open it in your browser.
 
 ```bash
@@ -78,7 +78,7 @@ node src/cli.js report
 node src/cli.js report -b develop
 ```
 
-### `pr-surgeon history`
+### `incisio history`
 Analyze git history to find Monster PR patterns on your team.
 
 ```bash
@@ -87,7 +87,7 @@ node src/cli.js history -n 100          # Analyze last 100 commits
 node src/cli.js history -b develop      # Analyze develop branch
 ```
 
-### `pr-surgeon hook`
+### `incisio hook`
 Install/remove a pre-push git hook for automatic scanning.
 
 ```bash
@@ -95,7 +95,7 @@ node src/cli.js hook install            # Auto-scan before every push
 node src/cli.js hook remove             # Remove the hook
 ```
 
-### `pr-surgeon demo`
+### `incisio demo`
 Run a demo with simulated Monster PR data.
 
 ```bash
@@ -109,7 +109,7 @@ node src/cli.js demo --report           # Also generate HTML report
 
 ### Multi-Dimensional Complexity Score (0-300)
 
-PR-Surgeon computes **5 independent metrics**, each scored 0-300, then combines them with weighted averaging:
+Incisio computes **5 independent metrics**, each scored 0-300, then combines them with weighted averaging:
 
 | Metric | Weight | What It Measures |
 |--------|--------|-----------------|
@@ -189,7 +189,7 @@ Est. Review Time: 47 minutes
 ## 🏗️ Architecture
 
 ```
-pr-surgeon/
+incisio/
 ├── src/
 │   ├── cli.js                    # CLI entry point (Commander.js)
 │   ├── core/

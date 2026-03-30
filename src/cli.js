@@ -19,19 +19,19 @@ import path from 'path';
 const program = new Command();
 
 const BANNER = chalk.hex('#00FFAA').bold(`
- ██████╗ ██████╗       ███████╗██╗   ██╗██████╗  ██████╗ ███████╗ ██████╗ ███╗   ██╗
- ██╔══██╗██╔══██╗      ██╔════╝██║   ██║██╔══██╗██╔════╝ ██╔════╝██╔═══██╗████╗  ██║
- ██████╔╝██████╔╝█████╗███████╗██║   ██║██████╔╝██║  ███╗█████╗  ██║   ██║██╔██╗ ██║
- ██╔═══╝ ██╔══██╗╚════╝╚════██║██║   ██║██╔══██╗██║   ██║██╔══╝  ██║   ██║██║╚██╗██║
- ██║     ██║  ██║      ███████║╚██████╔╝██║  ██║╚██████╔╝███████╗╚██████╔╝██║ ╚████║
- ╚═╝     ╚═╝  ╚═╝      ╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝
+ ██╗███╗   ██╗ ██████╗██╗███████╗██╗ ██████╗ 
+ ██║████╗  ██║██╔════╝██║██╔════╝██║██╔═══██╗
+ ██║██╔██╗ ██║██║     ██║███████╗██║██║   ██║
+ ██║██║╚██╗██║██║     ██║╚════██║██║██║   ██║
+ ██║██║ ╚████║╚██████╗██║███████║██║╚██████╔╝
+ ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝╚══════╝╚═╝ ╚═════╝ 
 `);
 
 const TAGLINE = chalk.gray('  X-ray your Pull Requests. Expose Monster PRs. Ship Clean Code.\n');
 
 program
-  .name('pr-surgeon')
-  .description('PR Complexity Scorer & Smart Splitter — X-ray your Pull Requests')
+  .name('incisio')
+  .description('Incisio — X-ray your Pull Requests, expose Monster PRs, ship clean code')
   .version('1.0.0');
 
 program
@@ -154,7 +154,7 @@ program
   .action(async (action) => {
     if (action === 'install') {
       await installHook();
-      console.log(chalk.green('✅ Pre-push hook installed! PR-Surgeon will auto-scan before every push.'));
+      console.log(chalk.green('✅ Pre-push hook installed! Incisio will auto-scan before every push.'));
     } else if (action === 'remove') {
       await removeHook();
       console.log(chalk.green('✅ Pre-push hook removed.'));
@@ -165,7 +165,7 @@ program
 
 program
   .command('demo')
-  .description('Run a demo scan with sample data to showcase PR-Surgeon')
+  .description('Run a demo scan with sample data to showcase Incisio')
   .option('--report', 'Also generate HTML report')
   .action(async (options) => {
     console.log(BANNER);

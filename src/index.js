@@ -1,6 +1,6 @@
 /**
- * PR-Surgeon — Programmatic API
- * Use this to integrate PR-Surgeon into your own tools.
+ * Incisio — Programmatic API
+ * Use this to integrate Incisio into your own tools.
  */
 
 export { scanCurrentDiff, scanCommitRange } from './core/scanner.js';

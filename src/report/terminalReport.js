@@ -318,11 +318,11 @@ function printBeforeAfter(ba) {
 
 function printFooter(summary) {
   const tip = summary.overallScore > 150
-    ? 'Run `pr-surgeon scan --report` to generate a full HTML X-Ray report to share with your team.'
-    : 'Your PR looks manageable. Run `pr-surgeon scan --report` for a detailed HTML report.';
+    ? 'Run `incisio scan --report` to generate a full HTML X-Ray report to share with your team.'
+    : 'Your PR looks manageable. Run `incisio scan --report` for a detailed HTML report.';
 
   console.log(chalk.gray(`  💡 ${tip}`));
-  console.log(chalk.gray(`  📖 Learn more: https://github.com/pr-surgeon\n`));
+  console.log(chalk.gray(`  📖 Learn more: https://github.com/hamzaali21345/raptors-xray\n`));
 }
 
 function truncatePath(p, maxLen) {

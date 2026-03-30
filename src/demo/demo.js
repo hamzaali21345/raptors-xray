@@ -7,7 +7,7 @@ import { generateReport } from '../report/htmlReport.js';
 import open from 'open';
 
 /**
- * Run a demo with realistic sample data to showcase PR-Surgeon capabilities.
+ * Run a demo with realistic sample data to showcase Incisio capabilities.
  * This simulates a Monster PR that touches database, API, UI, auth, and tests.
  */
 export async function runDemo(generateHtml = false) {
@@ -33,7 +33,7 @@ export async function runDemo(generateHtml = false) {
 
   spinner.succeed(chalk.green('Demo PR X-Ray scan complete!\n'));
 
-  console.log(chalk.gray.italic('  ℹ️  This is a demo using simulated data. Run "pr-surgeon scan" in a real git repo for actual results.\n'));
+  console.log(chalk.gray.italic('  ℹ️  This is a demo using simulated data. Run "incisio scan" in a real git repo for actual results.\n'));
 
   // Print terminal report
   printTerminalReport(complexityReport, splits, 150);

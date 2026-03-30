@@ -3,15 +3,15 @@ import path from 'path';
 import simpleGit from 'simple-git';
 
 const HOOK_CONTENT = `#!/bin/sh
-# PR-Surgeon Pre-Push Hook
+# Incisio Pre-Push Hook
 # Automatically scans your changes for Monster PRs before pushing
 
 echo ""
-echo "🔬 PR-Surgeon: Scanning your changes before push..."
+echo "🔬 Incisio: Scanning your changes before push..."
 echo ""
 
-# Run PR-Surgeon scan
-node "$(dirname "$0")/../../node_modules/.bin/pr-surgeon" scan 2>/dev/null || npx pr-surgeon scan 2>/dev/null || {
+# Run Incisio scan
+node "$(dirname "$0")/../../node_modules/.bin/incisio" scan 2>/dev/null || npx incisio scan 2>/dev/null || {
   # Fallback: run directly
   SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
   node "$SCRIPT_DIR/src/cli.js" scan
@@ -21,8 +21,8 @@ EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then
   echo ""
-  echo "⚠️  PR-Surgeon detected issues. Push continues anyway."
-  echo "   Run 'pr-surgeon scan --report' for a detailed HTML report."
+  echo "⚠️  Incisio detected issues. Push continues anyway."
+  echo "   Run 'incisio scan --report' for a detailed HTML report."
   echo ""
 fi
 
@@ -31,11 +31,11 @@ exit 0
 `;
 
 const HOOK_CONTENT_WINDOWS = `@echo off
-REM PR-Surgeon Pre-Push Hook
+REM Incisio Pre-Push Hook
 REM Automatically scans your changes for Monster PRs before pushing
 
 echo.
-echo 🔬 PR-Surgeon: Scanning your changes before push...
+echo 🔬 Incisio: Scanning your changes before push...
 echo.
 
 node "%~dp0\\..\\..\\src\\cli.js" scan
@@ -45,7 +45,7 @@ exit /b 0
 `;
 
 /**
- * Install a pre-push git hook that runs PR-Surgeon automatically
+ * Install a pre-push git hook that runs Incisio automatically
  */
 export async function installHook() {
   const git = simpleGit();
@@ -68,7 +68,7 @@ export async function installHook() {
   // Backup existing hook
   if (existsSync(hookPath)) {
     const existing = readFileSync(hookPath, 'utf-8');
-    if (!existing.includes('PR-Surgeon')) {
+    if (!existing.includes('Incisio')) {
       writeFileSync(hookPath + '.backup', existing, 'utf-8');
       console.log(`  📋 Existing pre-push hook backed up to ${hookPath}.backup`);
     }
@@ -85,7 +85,7 @@ export async function installHook() {
 }
 
 /**
- * Remove the PR-Surgeon pre-push hook
+ * Remove the Incisio pre-push hook
  */
 export async function removeHook() {
   const git = simpleGit();
@@ -95,7 +95,7 @@ export async function removeHook() {
 
   if (existsSync(hookPath)) {
     const content = readFileSync(hookPath, 'utf-8');
-    if (content.includes('PR-Surgeon')) {
+    if (content.includes('Incisio')) {
       // Restore backup if exists
       const backupPath = hookPath + '.backup';
       if (existsSync(backupPath)) {
@@ -106,9 +106,9 @@ export async function removeHook() {
         const { unlinkSync } = await import('fs');
         unlinkSync(hookPath);
       }
-      console.log('  🗑️  PR-Surgeon hook removed.');
+      console.log('  🗑️  Incisio hook removed.');
     } else {
-      console.log('  ℹ️  Pre-push hook exists but was not installed by PR-Surgeon. Skipping.');
+      console.log('  ℹ️  Pre-push hook exists but was not installed by Incisio. Skipping.');
     }
   } else {
     console.log('  ℹ️  No pre-push hook found.');

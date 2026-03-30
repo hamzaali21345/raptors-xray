@@ -1,10 +1,10 @@
 {
-  "name": "pr-surgeon",
+  "name": "incisio",
   "version": "1.0.0",
-  "description": "PR Complexity Scorer & Smart Splitter — X-ray your Pull Requests, expose monster PRs, and get intelligent split suggestions.",
+  "description": "Incisio — PR Complexity Scorer & Smart Splitter. X-ray your Pull Requests, expose Monster PRs, and get intelligent split suggestions.",
   "main": "src/index.js",
   "bin": {
-    "pr-surgeon": "./src/cli.js"
+    "incisio": "./src/cli.js"
   },
   "type": "module",
   "scripts": {
