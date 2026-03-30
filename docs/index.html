@@ -4,116 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PR-Surgeon — X-Ray Your Pull Requests</title>
-  <meta name="description" content="PR Complexity Scorer & Smart Splitter. X-ray Monster PRs and get intelligent split suggestions.">
-  <meta property="og:title" content="PR-Surgeon — X-Ray Your Pull Requests">
-  <meta property="og:description" content="Expose Monster PRs. Ship clean code. Built for DX-Ray Hackathon 2026.">
+  <meta name="description" content="Expose Monster PRs. Get intelligent split suggestions. Ship clean, reviewable code.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- CANVAS BG -->
-  <canvas id="particleCanvas"></canvas>
-  <div class="scan-line"></div>
+  <!-- BG layers -->
+  <canvas id="bgCanvas"></canvas>
+  <div class="noise"></div>
 
   <!-- NAV -->
-  <nav>
-    <div class="nav-inner">
-      <a href="#" class="nav-logo"><span class="logo-icon">&#9879;</span> PR-Surgeon</a>
-      <div class="nav-links">
-        <a href="#problem">Problem</a>
-        <a href="#features">Features</a>
-        <a href="#how">How It Works</a>
-        <a href="#install">Install</a>
-        <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="nav-cta">
+  <nav id="nav">
+    <div class="wrap">
+      <a href="#" class="logo"><span class="logo-dot"></span>PR-Surgeon</a>
+      <div class="nav-r">
+        <a href="#problem" class="nav-link">Problem</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how" class="nav-link">How It Works</a>
+        <a href="#start" class="nav-link">Get Started</a>
+        <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="nav-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          GitHub
+          Star on GitHub
         </a>
       </div>
+      <button class="hamburger" id="menuBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
 
   <!-- HERO -->
-  <section class="hero" id="hero">
-    <div class="hero-inner">
-      <div class="hero-badge">
-        <span class="badge-pulse"></span>
-        <span>DX-Ray Hackathon 2026</span>
-        <span class="badge-sep">/</span>
-        <span>Track G: Code Review Radar</span>
+  <header class="hero" id="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="scanner-line"></div>
+    <div class="wrap hero-wrap">
+      <div class="hero-tag">
+        <span class="tag-dot"></span>
+        SCAN IN PROGRESS
+        <span class="tag-sep">&mdash;</span>
+        DX-Ray Hackathon 2026 &middot; Track G
       </div>
-      <h1>
-        <span class="line1">X-Ray Your</span>
-        <span class="line2"><span class="gradient-text">Pull Requests</span></span>
+      <h1 class="hero-h1">
+        <span class="h1-line" data-delay="0">Stop Shipping</span>
+        <span class="h1-line" data-delay="1"><span class="h1-accent">Monster PRs</span></span>
       </h1>
-      <p class="hero-sub">Scan. Diagnose. Split. Ship clean code.<br>PR-Surgeon exposes Monster PRs and tells you exactly how to fix them.</p>
-      <div class="hero-actions">
-        <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="btn btn-glow">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-          View Source Code
+      <p class="hero-p">
+        PR-Surgeon X-rays your code changes in real-time, computes a <strong>5-dimensional complexity score</strong>, and tells you exactly how to split oversized Pull Requests into clean, reviewable pieces.
+      </p>
+      <div class="hero-ctas">
+        <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="cta cta-fill">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Get Started Free
         </a>
-        <a href="#install" class="btn btn-ghost">Quick Start Guide</a>
+        <a href="#demo" class="cta cta-outline">See It In Action</a>
       </div>
-      <div class="hero-metrics">
-        <div class="metric">
-          <span class="metric-val" data-target="5">0</span>
-          <span class="metric-label">Complexity Dimensions</span>
+      <!-- SOCIAL PROOF -->
+      <div class="proof">
+        <div class="proof-item">
+          <div class="proof-big" data-count="62">0%</div>
+          <div class="proof-label">Complexity Reduction</div>
         </div>
-        <div class="metric-divider"></div>
-        <div class="metric">
-          <span class="metric-val" data-target="8">0</span>
-          <span class="metric-label">Domain Categories</span>
+        <div class="proof-sep"></div>
+        <div class="proof-item">
+          <div class="proof-big" data-count="88">0%</div>
+          <div class="proof-label">Review Time Saved</div>
         </div>
-        <div class="metric-divider"></div>
-        <div class="metric">
-          <span class="metric-val" data-target="300">0</span>
-          <span class="metric-label">Max Score Range</span>
+        <div class="proof-sep"></div>
+        <div class="proof-item">
+          <div class="proof-big" data-count="6">0</div>
+          <div class="proof-label">Clean PRs from 1</div>
         </div>
-        <div class="metric-divider"></div>
-        <div class="metric">
-          <span class="metric-val" data-target="0">0</span>
-          <span class="metric-label">Config Required</span>
+        <div class="proof-sep"></div>
+        <div class="proof-item">
+          <div class="proof-big" data-count="0">0</div>
+          <div class="proof-label">Config Required</div>
         </div>
       </div>
     </div>
-  </section>
+    <div class="hero-fade"></div>
+  </header>
 
-  <!-- TERMINAL DEMO -->
-  <section class="terminal-section" id="demo">
-    <div class="container">
-      <div class="terminal-wrapper">
-        <div class="terminal-glow"></div>
-        <div class="terminal">
-          <div class="term-bar">
-            <div class="term-dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
-            <div class="term-title">pr-surgeon scan --report</div>
-            <div class="term-dots" style="visibility:hidden"><span class="dot"></span></div>
+  <!-- BEFORE/AFTER VISUAL -->
+  <section class="ba-section" id="demo">
+    <div class="wrap">
+      <div class="ba-grid">
+        <!-- BEFORE -->
+        <div class="ba-card ba-before">
+          <div class="ba-label ba-label-red">BEFORE</div>
+          <div class="ba-visual">
+            <div class="ba-circle ba-circle-red">
+              <svg class="ba-ring" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" stroke="rgba(248,113,113,0.1)" stroke-width="6" fill="none"/>
+                <circle cx="60" cy="60" r="54" stroke="#f87171" stroke-width="6" fill="none" stroke-dasharray="339.3" stroke-dashoffset="65" stroke-linecap="round" class="ring-fill"/>
+              </svg>
+              <div class="ba-score">245</div>
+              <div class="ba-max">/300</div>
+            </div>
+            <div class="ba-severity ba-sev-red">MONSTER PR</div>
           </div>
-          <div class="term-body" id="terminalOutput">
-            <div class="term-line"><span class="t-green">$</span> pr-surgeon scan</div>
-            <div class="term-line t-dim">Initiating PR X-Ray scan...</div>
-            <div class="term-line t-dim">Scanning git diff... Found 18 changed files.</div>
-            <div class="term-line t-dim">Analyzing complexity...</div>
-            <div class="term-line"><span class="t-cyan">&#10004;</span> PR X-Ray scan complete!</div>
-            <div class="term-line">&nbsp;</div>
-            <div class="term-line term-alert">&#128680; MONSTER PR DETECTED! &#128680;</div>
-            <div class="term-line">&nbsp;</div>
-            <div class="term-line">Complexity Score: <span class="t-red">245</span>/300</div>
-            <div class="term-line">Severity: <span class="t-red">MONSTER PR</span></div>
-            <div class="term-line">Est. Review Time: <span class="t-yellow">96 minutes</span></div>
-            <div class="term-line">&nbsp;</div>
-            <div class="term-line t-cyan">&#9986; SMART SPLIT SUGGESTIONS</div>
-            <div class="term-line">&nbsp;</div>
-            <div class="term-line"><span class="t-yellow">PR #1:</span> Database & Schema Changes <span class="t-dim">(3 files, ~12 min)</span></div>
-            <div class="term-line"><span class="t-yellow">PR #2:</span> Auth & Security Updates <span class="t-dim">(2 files, ~8 min)</span></div>
-            <div class="term-line"><span class="t-yellow">PR #3:</span> Configuration Changes <span class="t-dim">(3 files, ~2 min)</span></div>
-            <div class="term-line"><span class="t-yellow">PR #4:</span> API & Backend Logic <span class="t-dim">(3 files, ~18 min)</span></div>
-            <div class="term-line"><span class="t-yellow">PR #5:</span> UI Components <span class="t-dim">(4 files, ~21 min)</span></div>
-            <div class="term-line"><span class="t-yellow">PR #6:</span> Test Suite Updates <span class="t-dim">(3 files, ~10 min)</span></div>
-            <div class="term-line">&nbsp;</div>
-            <div class="term-line"><span class="t-purple">Complexity: -62%</span> &middot; <span class="t-purple">Review Time: -88%</span></div>
+          <div class="ba-stats">
+            <div class="ba-stat"><span class="ba-stat-val">18</span><span class="ba-stat-lbl">Files</span></div>
+            <div class="ba-stat"><span class="ba-stat-val">1,081</span><span class="ba-stat-lbl">Lines Changed</span></div>
+            <div class="ba-stat"><span class="ba-stat-val">96 min</span><span class="ba-stat-lbl">Review Time</span></div>
+            <div class="ba-stat"><span class="ba-stat-val">6</span><span class="ba-stat-lbl">Domains Mixed</span></div>
+          </div>
+          <div class="ba-files">
+            <div class="ba-file ba-file-crit">src/auth/middleware/rbac.js</div>
+            <div class="ba-file ba-file-high">src/models/User.js</div>
+            <div class="ba-file ba-file-high">src/controllers/UserController.js</div>
+            <div class="ba-file ba-file-mid">src/components/UserProfile.jsx</div>
+            <div class="ba-file ba-file-mid">src/routes/users.js</div>
+            <div class="ba-file ba-file-low">...and 13 more files</div>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div class="ba-arrow">
+          <div class="ba-arrow-line"></div>
+          <div class="ba-arrow-text">pr-surgeon<br>scan</div>
+          <div class="ba-arrow-icon">&#10132;</div>
+        </div>
+
+        <!-- AFTER -->
+        <div class="ba-card ba-after">
+          <div class="ba-label ba-label-green">AFTER SPLIT</div>
+          <div class="ba-visual">
+            <div class="ba-circle ba-circle-green">
+              <svg class="ba-ring" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" stroke="rgba(52,211,153,0.1)" stroke-width="6" fill="none"/>
+                <circle cx="60" cy="60" r="54" stroke="#34d399" stroke-width="6" fill="none" stroke-dasharray="339.3" stroke-dashoffset="235" stroke-linecap="round" class="ring-fill"/>
+              </svg>
+              <div class="ba-score ba-score-green">92</div>
+              <div class="ba-max">/300 avg</div>
+            </div>
+            <div class="ba-severity ba-sev-green">MODERATE</div>
+          </div>
+          <div class="ba-stats">
+            <div class="ba-stat"><span class="ba-stat-val ba-val-green">6</span><span class="ba-stat-lbl">Clean PRs</span></div>
+            <div class="ba-stat"><span class="ba-stat-val ba-val-green">~180</span><span class="ba-stat-lbl">Avg Lines/PR</span></div>
+            <div class="ba-stat"><span class="ba-stat-val ba-val-green">12 min</span><span class="ba-stat-lbl">Avg Review</span></div>
+            <div class="ba-stat"><span class="ba-stat-val ba-val-green">1</span><span class="ba-stat-lbl">Domain/PR</span></div>
+          </div>
+          <div class="ba-splits">
+            <div class="ba-split"><span class="split-dot split-db"></span>DB & Schema <span class="split-meta">3 files</span></div>
+            <div class="ba-split"><span class="split-dot split-auth"></span>Auth & Security <span class="split-meta">2 files</span></div>
+            <div class="ba-split"><span class="split-dot split-cfg"></span>Configuration <span class="split-meta">3 files</span></div>
+            <div class="ba-split"><span class="split-dot split-api"></span>API & Backend <span class="split-meta">3 files</span></div>
+            <div class="ba-split"><span class="split-dot split-ui"></span>UI Components <span class="split-meta">4 files</span></div>
+            <div class="ba-split"><span class="split-dot split-test"></span>Test Suite <span class="split-meta">3 files</span></div>
           </div>
         </div>
       </div>
@@ -122,40 +164,32 @@
 
   <!-- PROBLEM -->
   <section class="section" id="problem">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">// THE PROBLEM</span>
-        <h2>Monster PRs Are <span class="gradient-text">Killing</span><br>Your Code Reviews</h2>
-        <p class="section-sub">Invisible friction that every dev team has but nobody talks about.</p>
+    <div class="wrap">
+      <div class="s-header">
+        <span class="s-tag">THE HIDDEN FRICTION</span>
+        <h2 class="s-title">Every Team Has <span class="h1-accent">Monster PRs</span>.<br>Nobody Talks About It.</h2>
+        <p class="s-desc">Research from Google, Microsoft, and SmartBear proves what every developer already knows: oversized Pull Requests destroy review quality.</p>
       </div>
-      <div class="problem-grid">
-        <div class="xray-card" data-delay="0">
-          <div class="xray-card-scan"></div>
-          <div class="card-num">01</div>
-          <h3>Review Lag</h3>
-          <p>Average time-to-first-review exceeds 24 hours. Reviewers see +1000 LOC and close the tab.</p>
-          <div class="card-stat"><span class="stat-num">24h+</span> avg first review</div>
+      <div class="stats-row">
+        <div class="stat-block">
+          <div class="stat-icon-wrap"><div class="stat-icon">&#128337;</div></div>
+          <div class="stat-big">24h+</div>
+          <div class="stat-text">Average time to first review when PRs exceed 500 LOC</div>
         </div>
-        <div class="xray-card" data-delay="100">
-          <div class="xray-card-scan"></div>
-          <div class="card-num">02</div>
-          <h3>Quality Collapse</h3>
-          <p>Research proves effectiveness drops after 200 LOC. Beyond 1000, reviewers just skim and approve.</p>
-          <div class="card-stat"><span class="stat-num">200</span> LOC optimal limit</div>
+        <div class="stat-block">
+          <div class="stat-icon-wrap"><div class="stat-icon">&#128200;</div></div>
+          <div class="stat-big">-72%</div>
+          <div class="stat-text">Review effectiveness drops after 200 lines of code changes</div>
         </div>
-        <div class="xray-card" data-delay="200">
-          <div class="xray-card-scan"></div>
-          <div class="card-num">03</div>
-          <h3>Bug Injection</h3>
-          <p>Large PRs mixing DB + Auth + UI = missed edge cases. Defect rate jumps 40% past 500 lines.</p>
-          <div class="card-stat"><span class="stat-num">+40%</span> defect rate</div>
+        <div class="stat-block">
+          <div class="stat-icon-wrap"><div class="stat-icon">&#128027;</div></div>
+          <div class="stat-big">+40%</div>
+          <div class="stat-text">Higher defect rate in PRs mixing database, API, and UI changes</div>
         </div>
-        <div class="xray-card" data-delay="300">
-          <div class="xray-card-scan"></div>
-          <div class="card-num">04</div>
-          <h3>Reviewer Burnout</h3>
-          <p>Nobody wants to review a 1500-line PR on Friday. Result: rubber-stamp approvals and tech debt.</p>
-          <div class="card-stat"><span class="stat-num">&#8734;</span> frustration</div>
+        <div class="stat-block">
+          <div class="stat-icon-wrap"><div class="stat-icon">&#128561;</div></div>
+          <div class="stat-big">83%</div>
+          <div class="stat-text">Of developers admit to rubber-stamping large Pull Requests</div>
         </div>
       </div>
     </div>
@@ -163,276 +197,226 @@
 
   <!-- FEATURES -->
   <section class="section" id="features">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">// DIAGNOSTIC CAPABILITIES</span>
-        <h2>Not a Line Counter.<br>A Full <span class="gradient-text">X-Ray Scanner</span>.</h2>
-        <p class="section-sub">Multi-dimensional analysis that goes deeper than any existing tool.</p>
+    <div class="wrap">
+      <div class="s-header">
+        <span class="s-tag">DIAGNOSTIC CAPABILITIES</span>
+        <h2 class="s-title">Not a Line Counter.<br>A Full <span class="h1-accent">Diagnostic X-Ray</span>.</h2>
       </div>
-      <div class="features-grid">
-        <div class="feature-card featured">
-          <div class="feature-icon">&#129504;</div>
-          <div class="feature-badge">CORE ENGINE</div>
-          <h3>5-Dimensional Complexity Score</h3>
-          <p>Size, Cognitive Complexity, Domain Spread, File Coupling, and Risk Zones. Each scored 0-300 with weighted averaging into one actionable number.</p>
+      <div class="feat-grid">
+        <div class="feat-card feat-hero-card">
+          <div class="feat-hero-left">
+            <span class="feat-badge">CORE ENGINE</span>
+            <h3>5-Dimensional Complexity Score</h3>
+            <p>Goes far beyond LOC. Analyzes cognitive depth, domain spread, file coupling, and risk zones. Each dimension scored 0-300 then weighted into one actionable number.</p>
+          </div>
+          <div class="feat-hero-right">
+            <div class="dim-bars">
+              <div class="dim-bar"><span class="dim-name">Size</span><div class="dim-track"><div class="dim-fill" style="--w:70%;--c:#38bdf8"></div></div><span class="dim-w">25%</span></div>
+              <div class="dim-bar"><span class="dim-name">Cognitive</span><div class="dim-track"><div class="dim-fill" style="--w:60%;--c:#a78bfa"></div></div><span class="dim-w">25%</span></div>
+              <div class="dim-bar"><span class="dim-name">Domain</span><div class="dim-track"><div class="dim-fill" style="--w:80%;--c:#34d399"></div></div><span class="dim-w">20%</span></div>
+              <div class="dim-bar"><span class="dim-name">Coupling</span><div class="dim-track"><div class="dim-fill" style="--w:35%;--c:#fbbf24"></div></div><span class="dim-w">15%</span></div>
+              <div class="dim-bar"><span class="dim-name">Risk</span><div class="dim-track"><div class="dim-fill" style="--w:55%;--c:#f87171"></div></div><span class="dim-w">15%</span></div>
+            </div>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#127758;</div>
-          <div class="feature-badge">ZERO CONFIG</div>
+        <div class="feat-card">
+          <div class="feat-ic">&#127758;</div>
+          <span class="feat-badge">ZERO CONFIG</span>
           <h3>Auto Domain Detection</h3>
-          <p>Classifies every file into 8 domains: Database, Auth, API, UI, Tests, Config, Infra, Utils. Path patterns + content analysis. No setup needed.</p>
+          <p>Classifies files into 8 domains automatically: Database, Auth, API, UI, Tests, Config, Infra, Utils. Path + content analysis.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#9986;&#65039;</div>
-          <div class="feature-badge">KILLER FEATURE</div>
-          <h3>Smart Split Suggestions</h3>
-          <p>Dependency-aware splitting. Coupled files stay together. Cross-domain = separate PRs. Optimal merge order: DB &#8594; Auth &#8594; API &#8594; UI &#8594; Tests.</p>
+        <div class="feat-card">
+          <div class="feat-ic">&#9986;&#65039;</div>
+          <span class="feat-badge">SMART SPLIT</span>
+          <h3>Intelligent Split Suggestions</h3>
+          <p>Dependency-aware splitting. Coupled files stay together. Suggests PR merge order. Each split is self-contained and reviewable.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#9202;&#65039;</div>
-          <div class="feature-badge">RESEARCH-BACKED</div>
+        <div class="feat-card">
+          <div class="feat-ic">&#9202;&#65039;</div>
+          <span class="feat-badge">RESEARCH-BACKED</span>
           <h3>Review Time Prediction</h3>
-          <p>Estimates review duration using formulas derived from Microsoft & Google code review studies. Know before you push.</p>
+          <p>Estimates review duration based on Microsoft and Google studies on code review cognitive load and reviewer attention spans.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#128202;</div>
-          <div class="feature-badge">MEASURABLE</div>
-          <h3>Before / After Impact</h3>
-          <p>Every split shows quantifiable improvement: complexity reduction %, review time savings, risk level changes. Proof, not promises.</p>
+        <div class="feat-card">
+          <div class="feat-ic">&#128202;</div>
+          <span class="feat-badge">MEASURABLE</span>
+          <h3>Before / After Metrics</h3>
+          <p>Every scan shows quantifiable proof: complexity reduction %, review time saved, risk level changes. Data over opinions.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#128300;</div>
-          <div class="feature-badge">X-RAY EFFECT</div>
+        <div class="feat-card">
+          <div class="feat-ic">&#128300;</div>
+          <span class="feat-badge">X-RAY REPORT</span>
           <h3>HTML Diagnostic Report</h3>
-          <p>37KB dark-themed report with animated bars, domain maps, risk zones, severity badges. Opens in browser. Share with your team.</p>
+          <p>Dark-themed 37KB report with animated bars, domain maps, risk zones, severity badges. Opens in browser. Share with your team.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-ic">&#129694;</div>
+          <span class="feat-badge">AUTOMATION</span>
+          <h3>Git Hook Integration</h3>
+          <p>One command installs a pre-push hook. Every push is automatically scanned. Catch Monster PRs before they reach the review queue.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SCORING -->
-  <section class="section" id="scoring">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">// SCORING SYSTEM</span>
-        <h2>Five Dimensions.<br>One <span class="gradient-text">Actionable Score</span>.</h2>
+  <!-- TERMINAL -->
+  <section class="section term-section" id="terminal">
+    <div class="wrap">
+      <div class="s-header">
+        <span class="s-tag">LIVE OUTPUT</span>
+        <h2 class="s-title">See the <span class="h1-accent">X-Ray</span> in Action</h2>
       </div>
-      <div class="score-bars">
-        <div class="score-bar-row">
-          <div class="sb-label">&#128207; Size</div>
-          <div class="sb-track"><div class="sb-fill" data-width="25" style="--bar-color: #06b6d4"></div></div>
-          <div class="sb-pct">25%</div>
+      <div class="term-wrap">
+        <div class="term-glow"></div>
+        <div class="term">
+          <div class="term-chrome">
+            <div class="term-dots"><i class="td r"></i><i class="td y"></i><i class="td g"></i></div>
+            <span class="term-name">pr-surgeon scan --report</span>
+          </div>
+          <div class="term-body" id="termBody">
+            <p><span class="tg">$</span> pr-surgeon scan</p>
+            <p class="td2">Scanning git diff against main...</p>
+            <p class="td2">Found 18 changed files across 6 domains</p>
+            <p class="td2">Running 5-dimensional complexity analysis...</p>
+            <p><span class="tc">&#10004;</span> <span class="tc">Scan complete</span></p>
+            <p>&nbsp;</p>
+            <p class="tr tw">&#128680;&#128680;&#128680; MONSTER PR DETECTED &#128680;&#128680;&#128680;</p>
+            <p>&nbsp;</p>
+            <p>Complexity Score &middot;&middot;&middot; <span class="tr tw">245</span><span class="td2">/300</span></p>
+            <p>Severity &middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot; <span class="tr">MONSTER PR</span></p>
+            <p>Review Time &middot;&middot;&middot;&middot;&middot; <span class="ty">96 minutes</span></p>
+            <p>Files Changed &middot;&middot;&middot;&middot; <span class="tw">18</span></p>
+            <p>Domains Touched &middot;&middot; <span class="tw">6</span></p>
+            <p>&nbsp;</p>
+            <p class="tc tw">&#9986; RECOMMENDED SPLITS</p>
+            <p>&nbsp;</p>
+            <p><span class="ty">1.</span> Database & Schema &middot;&middot;&middot;&middot;&middot; <span class="td2">3 files &middot; ~12 min review</span></p>
+            <p><span class="ty">2.</span> Auth & Security &middot;&middot;&middot;&middot;&middot;&middot; <span class="td2">2 files &middot; ~8 min review</span></p>
+            <p><span class="ty">3.</span> Config &middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot; <span class="td2">3 files &middot; ~2 min review</span></p>
+            <p><span class="ty">4.</span> API & Backend &middot;&middot;&middot;&middot;&middot;&middot;&middot; <span class="td2">3 files &middot; ~18 min review</span></p>
+            <p><span class="ty">5.</span> UI Components &middot;&middot;&middot;&middot;&middot;&middot;&middot; <span class="td2">4 files &middot; ~21 min review</span></p>
+            <p><span class="ty">6.</span> Test Suite &middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot;&middot; <span class="td2">3 files &middot; ~10 min review</span></p>
+            <p>&nbsp;</p>
+            <p class="tp tw">&#9472;&#9472; IMPACT &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</p>
+            <p>Complexity <span class="td2">245 &#8594;</span> <span class="tg tw">92 avg</span> <span class="tg">(-62%)</span></p>
+            <p>Review Time <span class="td2">96m &#8594;</span> <span class="tg tw">12m avg</span> <span class="tg">(-88%)</span></p>
+            <p>Risk Level <span class="td2">MONSTER &#8594;</span> <span class="tg tw">MODERATE</span></p>
+          </div>
         </div>
-        <div class="score-bar-row">
-          <div class="sb-label">&#129504; Cognitive</div>
-          <div class="sb-track"><div class="sb-fill" data-width="25" style="--bar-color: #a855f7"></div></div>
-          <div class="sb-pct">25%</div>
-        </div>
-        <div class="score-bar-row">
-          <div class="sb-label">&#127758; Domain Spread</div>
-          <div class="sb-track"><div class="sb-fill" data-width="20" style="--bar-color: #10b981"></div></div>
-          <div class="sb-pct">20%</div>
-        </div>
-        <div class="score-bar-row">
-          <div class="sb-label">&#128279; Coupling</div>
-          <div class="sb-track"><div class="sb-fill" data-width="15" style="--bar-color: #f59e0b"></div></div>
-          <div class="sb-pct">15%</div>
-        </div>
-        <div class="score-bar-row">
-          <div class="sb-label">&#9888;&#65039; Risk</div>
-          <div class="sb-track"><div class="sb-fill" data-width="15" style="--bar-color: #ef4444"></div></div>
-          <div class="sb-pct">15%</div>
-        </div>
-      </div>
-      <div class="severity-strip">
-        <div class="sev-item sev-clean"><span>0-50</span><strong>CLEAN</strong></div>
-        <div class="sev-item sev-moderate"><span>51-100</span><strong>MODERATE</strong></div>
-        <div class="sev-item sev-complex"><span>101-150</span><strong>COMPLEX</strong></div>
-        <div class="sev-item sev-monster"><span>151-250</span><strong>MONSTER</strong></div>
-        <div class="sev-item sev-cata"><span>251-300</span><strong>CATASTROPHIC</strong></div>
       </div>
     </div>
   </section>
 
   <!-- HOW IT WORKS -->
   <section class="section" id="how">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">// DIAGNOSTIC PROTOCOL</span>
-        <h2>Four Steps to <span class="gradient-text">Clean PRs</span></h2>
+    <div class="wrap">
+      <div class="s-header">
+        <span class="s-tag">DIAGNOSTIC PROTOCOL</span>
+        <h2 class="s-title">Four Steps to <span class="h1-accent">Clean PRs</span></h2>
       </div>
-      <div class="steps-timeline">
-        <div class="step-item">
-          <div class="step-marker"><span>01</span></div>
-          <div class="step-content">
-            <h3>Scan</h3>
-            <p>Run <code>pr-surgeon scan</code>. Reads your git diff automatically. Detects all changed files, content, and import chains.</p>
-          </div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">01</div>
+          <div class="flow-dot"></div>
+          <h3>Scan</h3>
+          <p>One command reads your git diff. Detects files, content, imports, and change patterns automatically.</p>
+          <code>$ pr-surgeon scan</code>
         </div>
-        <div class="step-item">
-          <div class="step-marker"><span>02</span></div>
-          <div class="step-content">
-            <h3>Diagnose</h3>
-            <p>5-dimensional analysis: cognitive complexity, domain classification, coupling graph, risk assessment, and size metrics.</p>
-          </div>
+        <div class="flow-step">
+          <div class="flow-num">02</div>
+          <div class="flow-dot"></div>
+          <h3>Diagnose</h3>
+          <p>5-dimensional analysis: size, cognitive complexity, domain spread, coupling graph, risk score.</p>
+          <code>Score: 245/300</code>
         </div>
-        <div class="step-item">
-          <div class="step-marker"><span>03</span></div>
-          <div class="step-content">
-            <h3>Split</h3>
-            <p>Smart algorithm groups by domain, respects import coupling, assigns merge order. Each suggested PR is self-contained.</p>
-          </div>
+        <div class="flow-step">
+          <div class="flow-num">03</div>
+          <div class="flow-dot"></div>
+          <h3>Split</h3>
+          <p>Smart algorithm groups by domain, respects coupling, assigns merge order. Each PR is self-contained.</p>
+          <code>Split into 6 PRs</code>
         </div>
-        <div class="step-item">
-          <div class="step-marker"><span>04</span></div>
-          <div class="step-content">
-            <h3>Ship</h3>
-            <p>Follow the plan. Ship focused PRs. Get faster reviews, fewer bugs, happier teammates. See before/after proof.</p>
-          </div>
+        <div class="flow-step">
+          <div class="flow-num">04</div>
+          <div class="flow-dot"></div>
+          <h3>Ship</h3>
+          <p>Follow the plan. Ship focused PRs. Get faster reviews, fewer bugs, happier team. See the proof.</p>
+          <code>-88% review time</code>
         </div>
       </div>
     </div>
   </section>
 
   <!-- INSTALL -->
-  <section class="section" id="install">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">// GET STARTED</span>
-        <h2>Running in <span class="gradient-text">30 Seconds</span></h2>
-        <p class="section-sub">No config. No API keys. No setup wizards. Just scan and go.</p>
+  <section class="section" id="start">
+    <div class="wrap">
+      <div class="s-header">
+        <span class="s-tag">GET STARTED</span>
+        <h2 class="s-title">Running in <span class="h1-accent">30 Seconds</span></h2>
+        <p class="s-desc">No config files. No API keys. No setup wizards. Clone, install, scan.</p>
       </div>
-      <div class="install-grid">
-        <div class="install-card">
-          <div class="install-header">
-            <span class="install-icon">&#9889;</span>
-            <h3>Install</h3>
-          </div>
+      <div class="inst-grid">
+        <div class="inst-card">
+          <h3><span class="inst-num">01</span> Install</h3>
           <div class="code-block">
-            <span class="cb-comment"># Clone & install</span><br>
-            <span class="cb-prompt">$</span> git clone https://github.com/hamza0281/pr-surgeon.git<br>
-            <span class="cb-prompt">$</span> cd pr-surgeon<br>
-            <span class="cb-prompt">$</span> npm install<br><br>
-            <span class="cb-comment"># Run demo (no git repo needed)</span><br>
-            <span class="cb-prompt">$</span> npm run demo
+<span class="cc"># Clone & install</span>
+<span class="cg">$</span> git clone https://github.com/hamza0281/pr-surgeon.git
+<span class="cg">$</span> cd pr-surgeon
+<span class="cg">$</span> npm install
           </div>
         </div>
-        <div class="install-card">
-          <div class="install-header">
-            <span class="install-icon">&#128269;</span>
-            <h3>Scan</h3>
-          </div>
+        <div class="inst-card">
+          <h3><span class="inst-num">02</span> Scan</h3>
           <div class="code-block">
-            <span class="cb-comment"># Scan current changes</span><br>
-            <span class="cb-prompt">$</span> node src/cli.js scan<br><br>
-            <span class="cb-comment"># Against a specific branch</span><br>
-            <span class="cb-prompt">$</span> node src/cli.js scan -b develop<br><br>
-            <span class="cb-comment"># Generate HTML X-Ray report</span><br>
-            <span class="cb-prompt">$</span> node src/cli.js scan --report
+<span class="cc"># Scan current changes</span>
+<span class="cg">$</span> node src/cli.js scan
+<span class="cc"># With HTML report</span>
+<span class="cg">$</span> node src/cli.js scan --report
           </div>
         </div>
-        <div class="install-card">
-          <div class="install-header">
-            <span class="install-icon">&#128736;</span>
-            <h3>Automate</h3>
-          </div>
+        <div class="inst-card">
+          <h3><span class="inst-num">03</span> Automate</h3>
           <div class="code-block">
-            <span class="cb-comment"># Install pre-push hook</span><br>
-            <span class="cb-prompt">$</span> node src/cli.js hook install<br><br>
-            <span class="cb-comment"># Analyze team history</span><br>
-            <span class="cb-prompt">$</span> node src/cli.js history<br><br>
-            <span class="cb-comment"># Full HTML report</span><br>
-            <span class="cb-prompt">$</span> node src/cli.js report
+<span class="cc"># Auto-scan before every push</span>
+<span class="cg">$</span> node src/cli.js hook install
+<span class="cc"># Run demo (no repo needed)</span>
+<span class="cg">$</span> npm run demo
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ARCHITECTURE -->
-  <section class="section" id="arch">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">// ARCHITECTURE</span>
-        <h2>Clean. Modular. <span class="gradient-text">Zero Bloat</span>.</h2>
-      </div>
-      <div class="arch-layout">
-        <div class="arch-tree">
-          <div class="code-block">
-pr-surgeon/<br>
-&#9500;&#9472;&#9472; src/<br>
-&#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; cli.js&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-comment"># CLI entry (Commander)</span><br>
-&#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; index.js&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-comment"># Programmatic API</span><br>
-&#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; core/<br>
-&#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; scanner.js&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-comment"># Git diff parser</span><br>
-&#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; complexity.js&nbsp;&nbsp;<span class="cb-comment"># 5D scorer</span><br>
-&#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; splitter.js&nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-comment"># Smart split engine</span><br>
-&#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; history.js&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-comment"># History analyzer</span><br>
-&#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; report/<br>
-&#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; terminalReport.js<br>
-&#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; htmlReport.js<br>
-&#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; hooks/gitHook.js<br>
-&#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; demo/demo.js<br>
-&#9500;&#9472;&#9472; docs/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cb-comment"># This website</span><br>
-&#9500;&#9472;&#9472; package.json<br>
-&#9492;&#9472;&#9472; README.md
-          </div>
-        </div>
-        <div class="tech-stack">
-          <h3>Tech Stack</h3>
-          <div class="tech-pills">
-            <span class="tech-pill">Node.js</span>
-            <span class="tech-pill">Commander.js</span>
-            <span class="tech-pill">simple-git</span>
-            <span class="tech-pill">Chalk</span>
-            <span class="tech-pill">Boxen</span>
-            <span class="tech-pill">cli-table3</span>
-            <span class="tech-pill">Ora</span>
-          </div>
-          <h3 style="margin-top:2rem">Works With</h3>
-          <div class="tech-pills">
-            <span class="tech-pill">Any Git Repo</span>
-            <span class="tech-pill">Any Language</span>
-            <span class="tech-pill">Any Framework</span>
-            <span class="tech-pill">Windows / Mac / Linux</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HACKATHON BANNER -->
-  <section class="section" id="hackathon">
-    <div class="container">
-      <div class="hack-banner">
-        <div class="hack-glow"></div>
-        <span class="section-tag" style="margin-bottom:1rem;display:inline-block;">// DX-RAY HACKATHON 2026</span>
+  <!-- HACKATHON -->
+  <section class="section" id="hack">
+    <div class="wrap">
+      <div class="hack-card">
+        <div class="hack-orb"></div>
+        <span class="s-tag">DX-RAY HACKATHON 2026</span>
         <h2>Track G: Code Review Radar</h2>
-        <p>Built in 72 hours to expose hidden friction in code review workflows.</p>
-        <div class="bonus-checks">
-          <div class="bonus-item"><span class="check-icon">&#10003;</span> Real Data Demo</div>
-          <div class="bonus-item"><span class="check-icon">&#10003;</span> Before & After Metrics</div>
-          <div class="bonus-item"><span class="check-icon">&#10003;</span> Open Source Ready</div>
-          <div class="bonus-item"><span class="check-icon">&#10003;</span> Cross-Track Integration</div>
+        <p>Built in 72 hours to X-ray hidden friction in code review workflows.</p>
+        <div class="hack-checks">
+          <span class="hc"><em>&#10003;</em> Real Data Demo</span>
+          <span class="hc"><em>&#10003;</em> Before & After Metrics</span>
+          <span class="hc"><em>&#10003;</em> Open Source Ready</span>
+          <span class="hc"><em>&#10003;</em> Cross-Track Integration</span>
         </div>
-        <a href="https://dxrayhack.com" target="_blank" class="btn btn-glow" style="margin-top:2rem;">Visit DX-Ray Hackathon</a>
+        <div class="hack-ctas">
+          <a href="https://github.com/hamza0281/pr-surgeon" target="_blank" class="cta cta-fill">View Source Code</a>
+          <a href="https://dxrayhack.com" target="_blank" class="cta cta-outline">Visit DX-Ray</a>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <div class="container">
-      <div class="footer-inner">
-        <span class="nav-logo" style="font-size:1.1rem"><span class="logo-icon">&#9879;</span> PR-Surgeon</span>
-        <p>Built with relentless focus during <a href="https://dxrayhack.com" target="_blank">DX-Ray Hackathon 2026</a></p>
-        <div class="footer-links">
-          <a href="https://github.com/hamza0281/pr-surgeon" target="_blank">GitHub</a>
-          <span>&middot;</span>
-          <span>MIT License</span>
-          <span>&middot;</span>
-          <span>v1.0.0</span>
-        </div>
+    <div class="wrap foot-inner">
+      <a href="#" class="logo"><span class="logo-dot"></span>PR-Surgeon</a>
+      <p>Built with relentless focus during <a href="https://dxrayhack.com" target="_blank">DX-Ray Hackathon 2026</a></p>
+      <div class="foot-links">
+        <a href="https://github.com/hamza0281/pr-surgeon" target="_blank">GitHub</a>
+        <span>&middot;</span><span>MIT License</span><span>&middot;</span><span>v1.0.0</span>
       </div>
     </div>
   </footer>
